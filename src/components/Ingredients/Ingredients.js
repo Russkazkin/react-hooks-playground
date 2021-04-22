@@ -10,13 +10,16 @@ const Ingredients = props => {
   const addIngredient = ingredient => {
     setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: _.uniqueId('ingredient_')}]);
   }
+  const removeIngredient = id => {
+    setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));
+  }
   return (
     <div className="App">
       <IngredientForm onAddIngredient={addIngredient} />
 
       <section>
         <Search />
-        <IngredientList ingredients={ingredients} onRemoveItem={() => {}} />
+        <IngredientList ingredients={ingredients} onRemoveItem={removeIngredient} />
       </section>
     </div>
   );

@@ -1,16 +1,22 @@
-import React from 'react';
+import React, {useState} from 'react';
+import _ from 'lodash';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
+import IngredientList from "./IngredientList";
 
-function Ingredients() {
+const Ingredients = props => {
+  const [ingredients, setIngredients] = useState([]);
+  const addIngredient = ingredient => {
+    setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: _.uniqueId('ingredient_')}]);
+  }
   return (
     <div className="App">
-      <IngredientForm />
+      <IngredientForm onAddIngredient={addIngredient} />
 
       <section>
         <Search />
-        {/* Need to add list here! */}
+        <IngredientList ingredients={ingredients} onRemoveItem={() => {}} />
       </section>
     </div>
   );

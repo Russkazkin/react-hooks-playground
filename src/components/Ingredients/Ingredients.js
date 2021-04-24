@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import _ from 'lodash';
+import axios from "axios";
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
@@ -7,8 +7,9 @@ import IngredientList from "./IngredientList";
 
 const Ingredients = props => {
   const [ingredients, setIngredients] = useState([]);
-  const addIngredient = ingredient => {
-    setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: _.uniqueId('ingredient_')}]);
+  const addIngredient = async ingredient => {
+    const response = (await axios.post('https://react-hooks-playground-d70ef-default-rtdb.firebaseio.com/ingredients.json', ingredient)).data;
+    setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: response.name}]);
   }
   const removeIngredient = id => {
     setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));

@@ -5,7 +5,7 @@ import IngredientForm from './IngredientForm';
 import Search from './Search';
 import IngredientList from "./IngredientList";
 
-const Ingredients = props => {
+const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
   useEffect(() => {
@@ -13,15 +13,21 @@ const Ingredients = props => {
       const response = (await axios.get('ingredients.json')).data;
       const ingredients = [];
       for (const key in response) {
-        ingredients.push({
-          id: key,
-          title: response[key].title,
-          amount: response[key].amount,
-        });
+        if(response.hasOwnProperty(key)) {
+          ingredients.push({
+            id: key,
+            title: response[key].title,
+            amount: response[key].amount,
+          });
+        }
       }
       setIngredients(ingredients);
     })();
   }, []);
+
+  useEffect(() => {
+    console.log(ingredients);
+  }, [ingredients]);
 
 
   const addIngredient = async ingredient => {

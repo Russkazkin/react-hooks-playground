@@ -29,6 +29,10 @@ const Ingredients = () => {
     console.log(ingredients);
   }, [ingredients]);
 
+  const filterHandler = filteredIngredients => {
+    setIngredients(filteredIngredients);
+  }
+
 
   const addIngredient = async ingredient => {
     const response = (await axios.post('ingredients.json', ingredient)).data;
@@ -42,7 +46,7 @@ const Ingredients = () => {
       <IngredientForm onAddIngredient={addIngredient} />
 
       <section>
-        <Search />
+        <Search onLoadIngredients={filterHandler} />
         <IngredientList ingredients={ingredients} onRemoveItem={removeIngredient} />
       </section>
     </div>

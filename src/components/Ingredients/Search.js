@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import Card from '../UI/Card';
 import './Search.css';
@@ -22,7 +22,7 @@ const Search = React.memo(props => {
           });
         }
       }
-      //onLoadIngredients(ingredients);
+      onLoadIngredients(ingredients);
     })();
   }, [filter, onLoadIngredients]);
   return (

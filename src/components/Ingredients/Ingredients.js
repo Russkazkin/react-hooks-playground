@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import axios from '../../axios';
 
 import IngredientForm from './IngredientForm';
@@ -29,9 +29,9 @@ const Ingredients = () => {
     console.log(ingredients);
   }, [ingredients]);
 
-  const filterHandler = filteredIngredients => {
+  const filterHandler = useCallback(filteredIngredients => {
     setIngredients(filteredIngredients);
-  }
+  }, []);
 
 
   const addIngredient = async ingredient => {

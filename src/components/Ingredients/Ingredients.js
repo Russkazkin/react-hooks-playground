@@ -21,7 +21,8 @@ const Ingredients = () => {
     const response = (await axios.post('ingredients.json', ingredient)).data;
     setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: response.name}]);
   }
-  const removeIngredient = id => {
+  const removeIngredient = async id => {
+    await axios.delete(`ingredients/${id}.json`);
     setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));
   }
   return (

@@ -7,6 +7,7 @@ import IngredientList from "./IngredientList";
 
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     console.log(ingredients);
@@ -18,16 +19,20 @@ const Ingredients = () => {
 
 
   const addIngredient = async ingredient => {
+    setIsLoading(true);
     const response = (await axios.post('ingredients.json', ingredient)).data;
+    setIsLoading(false);
     setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: response.name}]);
   }
   const removeIngredient = async id => {
+    setIsLoading(true);
     await axios.delete(`ingredients/${id}.json`);
+    setIsLoading(false);
     setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));
   }
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredient} />
+      <IngredientForm onAddIngredient={addIngredient} loading={isLoading} />
 
       <section>
         <Search onLoadIngredients={filterHandler} />

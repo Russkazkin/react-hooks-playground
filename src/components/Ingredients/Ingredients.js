@@ -4,10 +4,12 @@ import axios from '../../axios';
 import IngredientForm from './IngredientForm';
 import Search from './Search';
 import IngredientList from "./IngredientList";
+import ErrorModal from "../UI/ErrorModal";
 
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   useEffect(() => {
     console.log(ingredients);
@@ -26,12 +28,23 @@ const Ingredients = () => {
   }
   const removeIngredient = async id => {
     setIsLoading(true);
-    await axios.delete(`ingredients/${id}.json`);
-    setIsLoading(false);
-    setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));
+    try {
+      await axios.delete(`ingredients/${id}.json`);
+      setIsLoading(false);
+      setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));
+    } catch (error) {
+      setError(error.message);
+      setIsLoading(false);
+    }
   }
+
+  const clearError = () => {
+    setError(null);
+  }
+
   return (
     <div className="App">
+      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
       <IngredientForm onAddIngredient={addIngredient} loading={isLoading} />
 
       <section>

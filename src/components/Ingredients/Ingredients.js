@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useReducer, useState, useEffect, useCallback} from 'react';
 import axios from '../../axios';
 
 import IngredientForm from './IngredientForm';
@@ -6,8 +6,21 @@ import Search from './Search';
 import IngredientList from "./IngredientList";
 import ErrorModal from "../UI/ErrorModal";
 
+const ingredientReducer = (currentIngredients, action) => {
+  switch (action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [...currentIngredients, action.ingredient];
+    case 'DELETE':
+      return currentIngredients.filter(ingredient => ingredient.id !== action.id);
+    default:
+      throw new Error('Should not get there!');
+  }
+}
+
 const Ingredients = () => {
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, dispatch] = useReducer(ingredientReducer, []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
 
@@ -16,7 +29,10 @@ const Ingredients = () => {
   }, [ingredients]);
 
   const filterHandler = useCallback(filteredIngredients => {
-    setIngredients(filteredIngredients);
+    dispatch({
+      type: 'SET',
+      ingredients: filteredIngredients,
+    });
   }, []);
 
 
@@ -24,14 +40,20 @@ const Ingredients = () => {
     setIsLoading(true);
     const response = (await axios.post('ingredients.json', ingredient)).data;
     setIsLoading(false);
-    setIngredients(previousIngredients => [...previousIngredients, {...ingredient, id: response.name}]);
+    dispatch({
+      type: 'ADD',
+      ingredient: {...ingredient, id: response.name},
+    });
   }
   const removeIngredient = async id => {
     setIsLoading(true);
     try {
       await axios.delete(`ingredients/${id}.json`);
       setIsLoading(false);
-      setIngredients(previousIngredients => previousIngredients.filter(ingredient => ingredient.id !== id));
+      dispatch({
+        type: 'DELETE',
+        id,
+      });
     } catch (error) {
       setError(error.message);
       setIsLoading(false);

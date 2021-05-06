@@ -1,4 +1,4 @@
-import React, {useReducer, useState, useEffect, useCallback} from 'react';
+import React, {useReducer, useEffect, useCallback} from 'react';
 import axios from '../../axios';
 
 import IngredientForm from './IngredientForm';
@@ -19,10 +19,24 @@ const ingredientReducer = (currentIngredients, action) => {
   }
 }
 
+const httpReducer = (currentHttpState, action) => {
+  switch (action.type) {
+    case 'SEND':
+      return { loading: true, error: null };
+    case 'RESPONSE':
+      return { ...currentHttpState, loading: false };
+    case 'ERROR':
+      return { loading: false, error: action.error };
+    case 'CLEAR':
+      return { ...currentHttpState, error: null };
+    default:
+      throw new Error('Should not get there!');
+  }
+}
+
 const Ingredients = () => {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [httpState, dispatchHttp] = useReducer(httpReducer, { loading: false, error: null });
 
   useEffect(() => {
     console.log(ingredients);
@@ -37,37 +51,36 @@ const Ingredients = () => {
 
 
   const addIngredient = async ingredient => {
-    setIsLoading(true);
+    dispatchHttp({type: 'SEND'});
     const response = (await axios.post('ingredients.json', ingredient)).data;
-    setIsLoading(false);
+    dispatchHttp({type: 'RESPONSE'});
     dispatch({
       type: 'ADD',
       ingredient: {...ingredient, id: response.name},
     });
   }
   const removeIngredient = async id => {
-    setIsLoading(true);
+    dispatchHttp({type: 'SEND'});
     try {
       await axios.delete(`ingredients/${id}.json`);
-      setIsLoading(false);
+      dispatchHttp({type: 'RESPONSE'});
       dispatch({
         type: 'DELETE',
         id,
       });
     } catch (error) {
-      setError(error.message);
-      setIsLoading(false);
+      dispatchHttp({ type: 'ERROR', error: error.message });
     }
   }
 
   const clearError = () => {
-    setError(null);
+    dispatchHttp({type: 'CLEAR'});
   }
 
   return (
     <div className="App">
-      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
-      <IngredientForm onAddIngredient={addIngredient} loading={isLoading} />
+      {httpState.error && <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>}
+      <IngredientForm onAddIngredient={addIngredient} loading={httpState.loading} />
 
       <section>
         <Search onLoadIngredients={filterHandler} />

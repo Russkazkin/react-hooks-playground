@@ -1,4 +1,4 @@
-import React, {useReducer, useEffect, useCallback} from 'react';
+import React, {useReducer, useEffect, useCallback, useMemo} from 'react';
 import axios from '../../axios';
 
 import IngredientForm from './IngredientForm';
@@ -22,13 +22,13 @@ const ingredientReducer = (currentIngredients, action) => {
 const httpReducer = (currentHttpState, action) => {
   switch (action.type) {
     case 'SEND':
-      return { loading: true, error: null };
+      return {loading: true, error: null};
     case 'RESPONSE':
-      return { ...currentHttpState, loading: false };
+      return {...currentHttpState, loading: false};
     case 'ERROR':
-      return { loading: false, error: action.error };
+      return {loading: false, error: action.error};
     case 'CLEAR':
-      return { ...currentHttpState, error: null };
+      return {...currentHttpState, error: null};
     default:
       throw new Error('Should not get there!');
   }
@@ -36,7 +36,7 @@ const httpReducer = (currentHttpState, action) => {
 
 const Ingredients = () => {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
-  const [httpState, dispatchHttp] = useReducer(httpReducer, { loading: false, error: null });
+  const [httpState, dispatchHttp] = useReducer(httpReducer, {loading: false, error: null});
 
   useEffect(() => {
     console.log(ingredients);
@@ -50,7 +50,7 @@ const Ingredients = () => {
   }, []);
 
 
-  const addIngredient = async ingredient => {
+  const addIngredient = useCallback(async ingredient => {
     dispatchHttp({type: 'SEND'});
     const response = (await axios.post('ingredients.json', ingredient)).data;
     dispatchHttp({type: 'RESPONSE'});
@@ -58,8 +58,8 @@ const Ingredients = () => {
       type: 'ADD',
       ingredient: {...ingredient, id: response.name},
     });
-  }
-  const removeIngredient = async id => {
+  }, []);
+  const removeIngredient = useCallback(async id => {
     dispatchHttp({type: 'SEND'});
     try {
       await axios.delete(`ingredients/${id}.json`);
@@ -69,22 +69,25 @@ const Ingredients = () => {
         id,
       });
     } catch (error) {
-      dispatchHttp({ type: 'ERROR', error: error.message });
+      dispatchHttp({type: 'ERROR', error: error.message});
     }
-  }
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatchHttp({type: 'CLEAR'});
-  }
+  }, []);
+
+  const ingredientList = useMemo(() => <IngredientList ingredients={ingredients}
+                                                       onRemoveItem={removeIngredient}/>, [ingredients, removeIngredient]);
 
   return (
     <div className="App">
       {httpState.error && <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>}
-      <IngredientForm onAddIngredient={addIngredient} loading={httpState.loading} />
+      <IngredientForm onAddIngredient={addIngredient} loading={httpState.loading}/>
 
       <section>
-        <Search onLoadIngredients={filterHandler} />
-        <IngredientList ingredients={ingredients} onRemoveItem={removeIngredient} />
+        <Search onLoadIngredients={filterHandler}/>
+        {ingredientList}
       </section>
     </div>
   );
